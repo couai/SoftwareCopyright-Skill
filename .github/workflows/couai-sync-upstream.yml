@@ -68,7 +68,7 @@ jobs:
                       message = json.loads(body).get("message", body)
                   except json.JSONDecodeError:
                       message = body
-                  raise ApiError(error.code, f"HTTP {error.code}: {message}") from None
+                  raise ApiError(error.code, f"HTTP {error.code} at {path}: {message}") from None
 
 
           def sync(api, repository, dry_run=False):
