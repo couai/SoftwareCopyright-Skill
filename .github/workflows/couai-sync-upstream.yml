@@ -94,12 +94,14 @@ jobs:
               if old_sha == source_sha:
                   return dict(report, status="up_to_date", ahead_by=0, behind_by=0)
               try:
-                  comparison = api(f"repos/{upstream}/compare/{source_sha}...{old_sha}")
+                  source_label = quote(upstream.split('/')[0] + ':' + source_branch, safe='')
+                  comparison = api(f"repos/{repository}/compare/{source_label}...{old_sha}")
               except ApiError as error:
                   if error.status == 404 and "no common ancestor" in str(error).lower():
                       return dict(report, status="blocked", reason="No common ancestor; manual history reconciliation required")
                   raise
-              report.update(ahead_by=comparison["ahead_by"], behind_by=comparison["behind_by"])
+              source_sha = comparison["base_commit"]["sha"]
+              report.update(upstream_sha=source_sha, ahead_by=comparison["ahead_by"], behind_by=comparison["behind_by"])
               if comparison["behind_by"] == 0:
                   return dict(report, status="up_to_date")
               if dry_run:
